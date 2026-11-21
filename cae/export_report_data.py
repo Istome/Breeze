@@ -34,3 +34,42 @@ out = {
 json.dump(out, open(os.path.join(RES, "report_data.json"), "w"), separators=(",", ":"), ensure_ascii=False)
 print(os.path.getsize(os.path.join(RES, "report_data.json")), "bytes")
 print(json.dumps(out["structure"], indent=0)[:900])
+
+# ------------------------------------------------------------------ round 2
+import os.path as _p
+if all(_p.exists(_p.join(RES, f)) for f in ("s8_cover.json", "s9_evap_air.json", "s10_ground.json", "s11_annual.json")):
+    s8, s9, s10, s11 = (L(f) for f in ("s8_cover.json", "s9_evap_air.json", "s10_ground.json", "s11_annual.json"))
+    inp = s11["inputs"]
+    skin_keys = {"r1": "26 mm film cells (round 1)", 26: "gap26", 50: "gap50", 75: "gap75", 100: "100 mm still-air cells", 150: "gap150"}
+    r2 = {
+        "cover": {sn: {k: {"daily": r(v["daily"], 3), "U": round(v["U"], 2)} for k, v in sv.items()} for sn, sv in s8["sites"].items()},
+        "cover_Tw": s8["Tw"],
+        "cover_hourly": {sn: {k: r(sv[k]["hourly_Tw20"]) for k in ("film + 26 mm still-air gap", "film + 100 mm still-air gap", "aerogel 6 mm")}
+                         for sn, sv in s8["sites"].items()},
+        "sinks": {site: {k: r(v) for k, v in rec.items()} for site, rec in s9["sinks"].items()},
+        "dd_evap": {site: {k: (round(v, 2) if isinstance(v, float) else None) for k, v in rec.items() if not isinstance(v, list)}
+                    for site, rec in s9["design_day"].items()},
+        "pit": {site: {"T_far": round(v["T_far_C"], 1), "rows": [{k: round(x[k], 1) for k in ("V", "R", "UA_W_K", "E_cap_MWh", "loss_MWh_yr")} for x in v["rows"]]}
+                for site, v in s10["pit"].items()},
+        "dome": s10["dome"],
+        "annual": {"days": inp["days"], "sites": {}},
+        "results": {},
+    }
+    for site, sd in inp["sites"].items():
+        r2["annual"]["sites"][site] = {
+            "plate": {str(g): {"direct": r(sd["plate"][k]["direct"], 3), "charge": r(sd["plate"][k]["charge"], 3)} for g, k in skin_keys.items()},
+            "loads": {k: r(v, 1) for k, v in sd["loads"].items()},
+            "latent": {k: r(v, 1) for k, v in sd["latent"].items()},
+            "evap_avail": r(sd["evap_avail"], 3), "evap_charge_avail": r(sd["evap_charge_avail"], 3),
+            "ua_coef": round(sd["pit_UA_coef"], 3), "T_far": round(sd["T_far"], 2),
+        }
+        res = s11["results"]
+        r2["results"][site] = {
+            "cfg": {name: [{k: round(x[k], 3) for k in ("N", "load_MWh", "unmet_MWh", "direct_MWh", "pit_MWh", "evap_MWh", "water_m3", "latent_MWh", "latent_unmet_MWh")}
+                           for x in rows] for name, rows in res[site].items()},
+            "pit_needed": res[site + "_pit_needed"], "pit_needed_latent": res[site + "_pit_needed_with_latent"],
+            "latent_1": round(res[site + "_latent_MWh_1storey"], 1),
+        }
+    out["r2"] = r2
+    json.dump(out, open(os.path.join(RES, "report_data.json"), "w"), separators=(",", ":"), ensure_ascii=False)
+    print("with round 2:", os.path.getsize(os.path.join(RES, "report_data.json")), "bytes")

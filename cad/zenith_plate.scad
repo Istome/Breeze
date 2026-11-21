@@ -10,17 +10,34 @@ enclosure_inset   = 6;
 enclosure_height  = 4.2;
 
 /* [Skin cell] */
+cell_type         = "ribs"; // ["ribs", "funnel"] round 2 = vertical ribs holding the film over still air
 cell_pitch        = 0.30;
-accept_deg        = 85;    // CAE-3/6 optimum for selective emitter; 50-60 for broadband in humid sites
+rib_height        = 0.10;  // CAE-8: still-air gap 75-100 mm (stably stratified under a cold emitter)
+accept_deg        = 85;    // funnel variant only (round 1; 50-60 for broadband in humid sites)
+wall_sheet        = 0.0003;
 base_sheet        = 0.0015;
 core              = 0.08;
+
+/* [Round 2: subterranean programme, pit, airflow] */
+sunk_storeys      = 3;     // 0 = round-1 exposed storey at grade
+storey_height     = 4.5;
+vault_rise        = 1.8;
+vault_cover       = 0.6;   // earth over 150 mm PIR
+pit_volume        = 6000;  // seasonal stratified water pit (CAE-10/11)
+pit_depth         = 6;
+stacks            = 4;
+stack_diameter    = 2.4;
+stack_above_plate = 3;
+lightwells        = 2;
+lightwell_size    = 8;
+earth_tubes       = 8;
 
 /* [Structure] */
 tile              = 3.0;
 column_grid       = 12;
 fork_drop         = 2.2;
 beam_depth        = 0.28;
-tank_volume       = 250;
+tank_volume       = 0;     // round 1 used a 250 m3 diurnal tank; round 2 the pit does both
 
 /* [Display] */
 show_cells_patch  = true;
@@ -30,8 +47,8 @@ mesh_n            = 24;    // plate surface resolution
 rise = camber * min(plot_x, plot_y);
 function pz(x, y) = plate_height + rise * (1 - pow(2*x/plot_x, 2)) * (1 - pow(2*y/plot_y, 2));
 
-e_half = 0.5 * cell_pitch * sin(accept_deg);
-cell_h = (0.5 * cell_pitch + e_half) / tan(accept_deg);
+e_half = cell_type == "ribs" ? 0.5 * cell_pitch - wall_sheet/2 : 0.5 * cell_pitch * sin(accept_deg);
+cell_h = cell_type == "ribs" ? rib_height : (0.5 * cell_pitch + e_half) / tan(accept_deg);
 depth  = core + base_sheet + 0.0007;
 
 // ---------------------------------------------------------------- plate
@@ -55,6 +72,20 @@ module plate() {
 
 // ---------------------------------------------------------------- skin cell
 module cell() {
+    if (cell_type == "ribs") rib_cell(); else funnel_cell();
+}
+
+module rib_cell() {
+    t = cell_pitch/2; h = cell_h; w = wall_sheet;
+    color([0.95, 0.95, 0.97]) difference() {
+        translate([-t, -t, 0]) cube([2*t, 2*t, h]);
+        translate([-t + w/2, -t + w/2, -0.001]) cube([2*t - w, 2*t - w, h + 0.002]);
+    }
+    color([0.15, 0.25, 0.55]) translate([-t + w/2, -t + w/2, 0]) cube([2*t - w, 2*t - w, 0.0004]);
+    color([1, 1, 1, 0.25]) translate([-t, -t, h]) cube([2*t, 2*t, 0.0002]);   // 12 um LDPE film
+}
+
+module funnel_cell() {
     t = cell_pitch/2; e = e_half; h = cell_h;
     color([0.95, 0.95, 0.97]) difference() {
         polyhedron(points = [[-t,-t,0],[t,-t,0],[t,t,0],[-t,t,0],[-t,-t,h],[t,-t,h],[t,t,h],[-t,t,h]],
@@ -90,13 +121,45 @@ module structure() {
     }
 }
 
+ex = plot_x/2 - enclosure_inset; ey = plot_y/2 - enclosure_inset;
+zb = -sunk_storeys * storey_height;
+
 module enclosure() {
-    color([0.88, 0.89, 0.91])
-    translate([-plot_x/2 + enclosure_inset, -plot_y/2 + enclosure_inset, 0])
-        cube([plot_x - 2*enclosure_inset, plot_y - 2*enclosure_inset, enclosure_height]);
+    if (sunk_storeys == 0) {
+        color([0.88, 0.89, 0.91]) translate([-ex, -ey, 0]) cube([2*ex, 2*ey, enclosure_height]);
+    } else {
+        color([0.80, 0.76, 0.70]) translate([-ex, -ey, zb]) cube([2*ex, 2*ey, -zb]);          // sunk programme
+        color([0.55, 0.45, 0.35]) intersection() {                                            // earth-covered barrel vault
+            translate([-ex, -ey, 0]) cube([2*ex, 2*ey, vault_rise + vault_cover]);
+            scale([1, 1, (vault_rise + vault_cover) / ey]) rotate([0, 90, 0]) cylinder(r = ey, h = 2*ex, center = true, $fn = 64);
+        }
+        pa = pit_volume / pit_depth; sy = min(2*ey, sqrt(pa * ey / ex)); sx = pa / sy;
+        color([0.2, 0.45, 0.8, 0.8]) translate([-sx/2, -sy/2, zb - pit_depth]) cube([sx, sy, pit_depth - 0.4]);   // seasonal pit
+        for (k = [0 : lightwells - 1]) {
+            cx = (-1 + 2*(k + 0.5)/lightwells) * ex * 0.6;
+            color([0.8, 0.9, 0.95, 0.5]) translate([cx - lightwell_size/2, -lightwell_size/2, zb + storey_height])
+                cube([lightwell_size, lightwell_size, -zb - storey_height + vault_rise + vault_cover + 0.3]);
+        }
+        for (k = [0 : stacks - 1]) {
+            cx = (-1 + 2*(k % 2 + 0.5)/2) * ex * 0.55;
+            cy = stacks > 2 ? (-1 + 2*(floor(k/2) + 0.5)/2) * ey * 0.5 : 0;
+            color([0.6, 0.62, 0.66]) translate([cx, cy, 0]) cylinder(r = stack_diameter/2, h = pz(cx, cy) + stack_above_plate, $fn = 32);
+        }
+        for (k = [0 : earth_tubes - 1]) {
+            a = 360 * (k + 0.5) / earth_tubes;
+            px = 0.48 * plot_x * cos(a); py = 0.48 * plot_y * sin(a);
+            color([0.45, 0.45, 0.45]) {
+                translate([px, py, -3]) cylinder(r = 0.25, h = 4.5, $fn = 12);
+                hull() { translate([px, py, -3]) sphere(0.2, $fn = 8); translate([0.9*max(-ex, min(ex, px)), 0.9*max(-ey, min(ey, py)), -3]) sphere(0.2, $fn = 8); }
+            }
+        }
+    }
 }
 
 module tank() {
+    if (tank_volume > 0) tank_body();
+}
+module tank_body() {
     r = sqrt(tank_volume / (PI * 5));
     color([0.36, 0.56, 0.85]) translate([0, 0, -6]) cylinder(r = r, h = 5, $fn = 64);
 }
@@ -109,4 +172,5 @@ if (show_cells_patch) {
         translate([cx, cy, pz(cx, cy) + 0.002]) cell();
     }
 }
-echo(str("cell height = ", cell_h*1000, " mm; emitter fraction = ", pow(2*e_half/cell_pitch, 2), "; rise = ", rise, " m"));
+echo(str("cell height = ", cell_h*1000, " mm; emitter fraction = ", pow(2*e_half/cell_pitch, 2), "; rise = ", rise, " m; floor area = ",
+          4*ex*ey*max(1, sunk_storeys), " m2; pit capacity = ", pit_volume*4186*8/3.6e6, " MWh (8 K)"));

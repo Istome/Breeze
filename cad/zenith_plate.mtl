@@ -13,3 +13,21 @@ Kd 0.20 0.45 0.80
 newmtl cells
 Kd 0.92 0.93 0.95
 
+newmtl program
+Kd 0.70 0.66 0.60
+
+newmtl vault
+Kd 0.55 0.45 0.35
+
+newmtl pit
+Kd 0.15 0.40 0.75
+
+newmtl lightwell
+Kd 0.80 0.90 0.95
+
+newmtl stack
+Kd 0.60 0.62 0.66
+
+newmtl earthtube
+Kd 0.45 0.45 0.45
+

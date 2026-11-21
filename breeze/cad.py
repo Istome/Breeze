@@ -21,12 +21,28 @@ class DesignParams:
     plot_y: float = 48.0            # N-S depth of plate (m)
     plate_height: float = 6.0       # top of plate at its edges, above grade (m)
     camber: float = 0.04            # rise / short span of the doubly-curved plate (CAE-7)
-    enclosure_inset: float = 6.0    # enclosed programme set back under plate (m)
-    enclosure_height: float = 4.2   # single-storey programme (m)
-    # skin cell (square inverted-pyramid, specular walls). CAE-3/6 drive the
-    # acceptance angle to ~85 deg: the cavity collapses into a film-support rib grid.
+    enclosure_inset: float = 6.0    # programme set back under plate (m)
+    enclosure_height: float = 4.2   # storey height of an at-grade storey (m)
+    # round 2: subterranean programme, earth vault, seasonal pit, airflow (CAE-9..11)
+    sunk_storeys: int = 3           # storeys below grade (0 = round-1 exposed box)
+    storey_height: float = 4.5
+    vault_rise: float = 1.8         # barrel vault over the sunk programme (E-W axis)
+    vault_cover: float = 0.6        # earth over vault, on 150 mm PIR (U 0.13, 60 h lag)
+    pit_volume: float = 6000.0      # seasonal stratified water pit below the programme (m3)
+    pit_depth: float = 6.0
+    stacks: int = 4                 # night-flush stacks through the plate
+    stack_diameter: float = 2.4
+    stack_above_plate: float = 3.0
+    lightwells: int = 2             # daylight courts through vault (and plate slots)
+    lightwell_size: float = 8.0
+    earth_tubes: int = 8            # fresh-air earth tubes at 3 m depth
+    # skin cell. Round 1: inverted-pyramid funnels, optimum theta_a ~85 deg (a rib grid).
+    # Round 2 (CAE-8): vertical mirror ribs holding the film 100 mm above the emitter;
+    # the stably stratified still-air gap is the insulation.
+    cell_type: str = "ribs"         # "ribs" (round 2) | "funnel" (round 1 / humid broadband variant)
     cell_pitch: float = 0.30        # aperture side (m)
-    accept_deg: float = 85.0        # acceptance half-angle theta_a (deg)
+    rib_height: float = 0.10        # still-air gap under the film (m), CAE-8 optimum 75-100 mm
+    accept_deg: float = 85.0        # funnel acceptance half-angle (cell_type="funnel")
     truncation: float = 1.0         # fraction of ideal wall height kept
     base_sheet: float = 1.5e-3      # roll-bond Al emitter/channel sheet (m)
     wall_sheet: float = 0.3e-3      # rib sheet (m)
@@ -37,16 +53,20 @@ class DesignParams:
     column_grid: float = 12.0       # tree-column spacing (m); branch tips form a grid/2 grillage
     fork_drop: float = 2.2          # trunk fork below grillage (m)
     beam_depth: float = 0.28        # glulam grillage depth (CAE-5)
-    # storage
-    tank_volume_m3: float = 250.0
+    # storage (round 1 diurnal tank; round 2 the stratified pit does both jobs)
+    tank_volume_m3: float = 0.0
 
     # ---------- derived
     @property
     def emitter_half(self):
+        if self.cell_type == "ribs":
+            return 0.5 * self.cell_pitch - 0.5 * self.wall_sheet
         return 0.5 * self.cell_pitch * np.sin(np.radians(self.accept_deg))
 
     @property
     def cell_height(self):
+        if self.cell_type == "ribs":
+            return self.rib_height
         t = 0.5 * self.cell_pitch
         return self.truncation * (t + self.emitter_half) / np.tan(np.radians(self.accept_deg))
 
@@ -65,10 +85,17 @@ class DesignParams:
             "columns": (int(self.plot_x // self.column_grid)) * (int(self.plot_y // self.column_grid)),
             "camber_rise_m": self.camber * min(self.plot_x, self.plot_y),
             "tiles": int(round(self.plot_x / self.tile) * round(self.plot_y / self.tile)),
+            "floor_area_m2": (self.plot_x - 2 * self.enclosure_inset) * (self.plot_y - 2 * self.enclosure_inset) * max(1, self.sunk_storeys),
+            "pit_footprint_m2": self.pit_volume / self.pit_depth,
+            "pit_capacity_MWh_8K": self.pit_volume * 1000 * 4186 * 8 / 3.6e9,
+            "excavation_m3": (self.plot_x - 2 * self.enclosure_inset) * (self.plot_y - 2 * self.enclosure_inset) * self.sunk_storeys * self.storey_height + self.pit_volume,
+            "stack_area_fraction_of_plate": self.stacks * np.pi * (self.stack_diameter / 2) ** 2 / (self.plot_x * self.plot_y),
             "wall_area_per_m2_roof": self.wall_area_ratio(),
         }
 
     def wall_area_ratio(self):
+        if self.cell_type == "ribs":
+            return 4 * self.cell_pitch * self.rib_height / 2 / self.cell_pitch**2
         t, e, h = 0.5 * self.cell_pitch, self.emitter_half, self.cell_height
         slant = np.hypot(h, t - e)
         return 4 * (t + e) * slant / self.cell_pitch**2
@@ -152,8 +179,21 @@ def strut_mesh(p0, p1, r, n=10):
 
 def funnel_cell_mesh(p: DesignParams, closed=True):
     """One skin cell in local coords: aperture centred at (0,0,h), emitter at z=0.
-    Returns {'emitter': (V,F), 'mirror': (V,F)}."""
+    Returns {'emitter': (V,F), 'mirror': (V,F)}.  For cell_type='ribs' the walls
+    are vertical sheets of thickness wall_sheet (the film sits on their tops)."""
     t, e, h = 0.5 * p.cell_pitch, p.emitter_half, p.cell_height
+    if p.cell_type == "ribs":
+        out = {"emitter": ([[-e, -e, 0], [e, -e, 0], [e, e, 0], [-e, e, 0]], [[0, 1, 2], [0, 2, 3]])}
+        Vm, Fm = [], []
+        for (x0, y0, x1, y1) in ((-t, -t, t, -e), (-t, e, t, t), (-t, -e, -e, e), (e, -e, t, e)):
+            V, F = box_mesh([x0, y0, 0], [x1, y1, h])
+            Fm += [[f + len(Vm) for f in tri] for tri in F]
+            Vm += V
+        out["mirror"] = (Vm, Fm)
+        if closed:
+            out["base"] = box_mesh([-t, -t, -p.base_sheet], [t, t, 0])
+            out["film"] = ([[-t, -t, h], [t, -t, h], [t, t, h], [-t, t, h]], [[0, 1, 2], [0, 2, 3]])
+        return out
     B = [[-e, -e, 0], [e, -e, 0], [e, e, 0], [-e, e, 0]]
     T = [[-t, -t, h], [t, -t, h], [t, t, h], [-t, t, h]]
     Vm = B + T
@@ -230,12 +270,53 @@ def building(p: DesignParams, cell_patch=6.0):
             for dx, dy in ((1, 1), (1, -1), (-1, 1), (-1, -1)):
                 tx, ty = x + dx * g / 4, y + dy * g / 4
                 m.add("structure_branches", *strut_mesh([x, y, fork], [tx, ty, plate_z(p, tx, ty) - depth - p.beam_depth], 0.084))
-    # enclosure (low-e clad box)
     i = p.enclosure_inset
-    m.add("enclosure_lowe", *box_mesh([-X / 2 + i, -Y / 2 + i, 0], [X / 2 - i, Y / 2 - i, p.enclosure_height]))
-    # thermal storage tank (buried)
-    r_t = (p.tank_volume_m3 / (np.pi * 5.0)) ** 0.5
-    m.add("tank_water", *cylinder_mesh([0, 0, -6.0], r_t, 5.0, 48))
+    ex, ey = X / 2 - i, Y / 2 - i
+    if p.sunk_storeys == 0:
+        m.add("enclosure_lowe", *box_mesh([-ex, -ey, 0], [ex, ey, p.enclosure_height]))
+    else:
+        zb = -p.sunk_storeys * p.storey_height
+        # retaining box of the sunk programme (drawn as its outer skin)
+        m.add("program_sunk", *box_mesh([-ex, -ey, zb], [ex, ey, 0.0]))
+        # barrel vault (E-W axis) with earth cover, springing at grade
+        nv, nx_ = 16, 24
+        V, F = [], []
+        for k in range(nv + 1):
+            a_ = np.pi * k / nv
+            for j, x in enumerate(np.linspace(-ex, ex, nx_ + 1)):
+                yy = -ey * np.cos(a_)
+                zz = (p.vault_rise + p.vault_cover) * np.sin(a_)
+                V.append([x, yy, zz])
+        for k in range(nv):
+            for j in range(nx_):
+                a0 = k * (nx_ + 1) + j
+                F += [[a0, a0 + 1, a0 + nx_ + 2], [a0, a0 + nx_ + 2, a0 + nx_ + 1]]
+        m.add("vault_earth", V, F)
+        # seasonal pit below the programme
+        pa = p.pit_volume / p.pit_depth
+        side_y = min(2 * ey, np.sqrt(pa * ey / ex))
+        side_x = pa / side_y
+        m.add("pit_water", *box_mesh([-side_x / 2, -side_y / 2, zb - p.pit_depth], [side_x / 2, side_y / 2, zb - 0.4]))
+        # light courts through vault (shown as glazed boxes)
+        for k in range(p.lightwells):
+            cx = (-1 + 2 * (k + 0.5) / p.lightwells) * ex * 0.6
+            L = p.lightwell_size / 2
+            m.add("lightwell_glass", *box_mesh([cx - L, -L, zb + p.storey_height], [cx + L, L, p.vault_rise + p.vault_cover + 0.3]))
+        # night-flush stacks through the plate
+        for k in range(p.stacks):
+            cx = (-1 + 2 * (k % 2 + 0.5) / 2) * ex * 0.55
+            cy = (-1 + 2 * (k // 2 + 0.5) / 2) * ey * 0.5 if p.stacks > 2 else 0.0
+            top = plate_z(p, cx, cy) + p.stack_above_plate
+            m.add("stack_flush", *cylinder_mesh([cx, cy, 0.0], p.stack_diameter / 2, top, 28))
+        # earth tubes: intake posts at plate perimeter, tubes at -3 m into the programme
+        for k in range(p.earth_tubes):
+            ang = 2 * np.pi * (k + 0.5) / p.earth_tubes
+            px, py = 0.5 * X * np.cos(ang) * 0.96, 0.5 * Y * np.sin(ang) * 0.96
+            m.add("earthtube_intake", *cylinder_mesh([px, py, -3.0], 0.25, 4.5, 12))
+            m.add("earthtube_pipe", *strut_mesh([px, py, -3.0], [np.clip(px, -ex, ex) * 0.9, np.clip(py, -ey, ey) * 0.9, -3.0], 0.2))
+    if p.tank_volume_m3 > 0:
+        r_t = (p.tank_volume_m3 / (np.pi * 5.0)) ** 0.5
+        m.add("tank_water", *cylinder_mesh([0, 0, -6.0], r_t, 5.0, 48))
     # explicit cell patch at SE corner
     cell = funnel_cell_mesh(p, closed=False)
     n = int(cell_patch / p.cell_pitch)
@@ -255,7 +336,9 @@ def export_all(p: DesignParams, outdir):
     b = building(p)
     with open(os.path.join(outdir, "zenith_plate.mtl"), "w") as f:
         for name, kd in (("plate", "0.85 0.88 0.92"), ("structure", "0.35 0.33 0.30"), ("enclosure", "0.75 0.77 0.80"),
-                         ("tank", "0.20 0.45 0.80"), ("cells", "0.92 0.93 0.95")):
+                         ("tank", "0.20 0.45 0.80"), ("cells", "0.92 0.93 0.95"), ("program", "0.70 0.66 0.60"),
+                         ("vault", "0.55 0.45 0.35"), ("pit", "0.15 0.40 0.75"), ("lightwell", "0.80 0.90 0.95"),
+                         ("stack", "0.60 0.62 0.66"), ("earthtube", "0.45 0.45 0.45")):
             f.write(f"newmtl {name}\nKd {kd}\n\n")
     b.write_obj(os.path.join(outdir, "zenith_plate.obj"), "zenith_plate.mtl")
     b.write_stl(os.path.join(outdir, "zenith_plate.stl"))

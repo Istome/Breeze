@@ -1,0 +1,495 @@
+<title>Zenith Plate</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: engineering dossier. A single left-aligned reading column, with full-width bands for the model and the charts. */
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --ink:#151a23; --muted:#5b6475; --rule:#dde1e8;
+  --sky:#1f3fbf;      /* emitter / zenith */
+  --heat:#c9521f;     /* IR window, heat */
+  --good:#16805f; --bad:#b4233c;
+  --s1:#1f3fbf; --s2:#c9521f; --s3:#16805f; --s4:#8a3fa8; --s5:#9a7400; --s6:#4f5d70; --s7:#c23a62; --s8:#2b8fb0; --s9:#151a23;
+  --scene-bg:#e4e9f1; --ground:#b9c0cb;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1119; --panel:#141a25; --ink:#e7ebf2; --muted:#98a2b5; --rule:#263043;
+  --sky:#7d97ff; --heat:#ff8a50; --good:#4cc79a; --bad:#ff6b85;
+  --s1:#7d97ff; --s2:#ff8a50; --s3:#4cc79a; --s4:#c98bea; --s5:#e2be4c; --s6:#9aa7bb; --s7:#ff7fa6; --s8:#5fc6e6; --s9:#e7ebf2;
+  --scene-bg:#0f1521; --ground:#1b2230; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1119; --panel:#141a25; --ink:#e7ebf2; --muted:#98a2b5; --rule:#263043;
+  --sky:#7d97ff; --heat:#ff8a50; --good:#4cc79a; --bad:#ff6b85;
+  --s1:#7d97ff; --s2:#ff8a50; --s3:#4cc79a; --s4:#c98bea; --s5:#e2be4c; --s6:#9aa7bb; --s7:#ff7fa6; --s8:#5fc6e6; --s9:#e7ebf2;
+  --scene-bg:#0f1521; --ground:#1b2230; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+.prose{max-width:70ch}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;letter-spacing:-0.01em;margin:0}
+h1{font-size:clamp(2.4rem,6vw,4.2rem);font-weight:800;line-height:1.0}
+h2{font-size:1.65rem;font-weight:700;margin-top:0.2rem}
+h3{font-size:1.08rem;font-weight:700}
+p{margin:0}
+.stack{display:flex;flex-direction:column;gap:14px}
+.eyebrow{font:500 11.5px/1.2 var(--mono);letter-spacing:0.12em;text-transform:uppercase;color:var(--heat)}
+.lede{font-size:1.14rem;color:var(--ink);max-width:62ch}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+section{padding-block:44px;border-top:1px solid var(--rule)}
+header{padding-block:40px 28px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 22px;font:12.5px var(--mono);color:var(--muted)}
+.eq{font-family:var(--mono);background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:14px 16px;overflow-x:auto;font-size:14px;line-height:1.7}
+.eq b{color:var(--sky);font-weight:500}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:22px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:18px}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:16px;min-width:0}
+.fig{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px 14px 10px;min-width:0}
+.fig h3{font-size:0.98rem}
+.fig .cap{font-size:12.5px;color:var(--muted);margin-top:6px}
+.fig svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.finding{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline}
+.finding .n{font:700 1.6rem/1 var(--display);color:var(--sky);font-variant-numeric:tabular-nums}
+.finding p{font-size:14px}
+.verdict{border-left:3px solid var(--sky);padding:4px 0 4px 16px}
+.tag{display:inline-block;font:500 11px/1 var(--mono);letter-spacing:0.06em;text-transform:uppercase;padding:4px 7px;border-radius:4px;border:1px solid currentColor}
+.tag.ok{color:var(--good)} .tag.no{color:var(--bad)} .tag.part{color:var(--heat)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:500 11.5px var(--mono);letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.tbl{overflow-x:auto}
+/* model band */
+.model{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:18px;align-items:start}
+@media (max-width:900px){.model{grid-template-columns:1fr}}
+.viewport{position:relative;background:var(--scene-bg);border:1px solid var(--rule);border-radius:8px;overflow:hidden;aspect-ratio:16/10;max-width:100%}
+.viewport canvas{display:block;width:100%;height:100%}
+.viewport .hint{position:absolute;left:10px;bottom:8px;font:11.5px var(--mono);color:var(--muted);pointer-events:none}
+.cellview{aspect-ratio:4/3}
+.cellrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+@media (max-width:700px){.cellrow{grid-template-columns:1fr}}
+.ctrl{display:flex;flex-direction:column;gap:12px}
+.ctrl label{display:grid;grid-template-columns:1fr auto;gap:2px 8px;font-size:13px}
+.ctrl label output{font:500 12.5px var(--mono);color:var(--sky)}
+.ctrl input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--sky)}
+.ctrl select{grid-column:1/-1;font:inherit;padding:5px 6px;border-radius:5px;border:1px solid var(--rule);background:var(--panel);color:var(--ink)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-top:4px}
+.kpi .v{font:600 1.15rem/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.kpi .k{font-size:11.5px;color:var(--muted)}
+.kpi.big{grid-column:1/-1}
+.kpi.big .v{font-size:1.6rem;color:var(--sky)}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.seg button{font:500 12px var(--mono);padding:6px 10px;background:var(--panel);color:var(--muted);border:0;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--sky);color:var(--panel)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--heat);outline-offset:2px}
+.hyp{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:16px}
+.hyp .card h3{margin-bottom:6px}
+ul.tight{margin:0;padding-left:1.1rem} ul.tight li{margin:3px 0}
+footer{padding-block:30px 60px;border-top:1px solid var(--rule);font-size:13px;color:var(--muted)}
+code{font-family:var(--mono);font-size:0.92em}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="stack">
+  <div class="eyebrow">Radiative heat rejection · geometry study · CAD + CAE</div>
+  <h1>Zenith Plate</h1>
+  <p class="lede">The building shape that sheds the most heat by thermal radiation is not a finned object or a tower. It is a broad, gently cambered plate that faces the cold zenith, with mirrors toward the warm ground and horizon.</p>
+  <div class="meta"><span>Design site: hot-dry, 33.45° N, 24–38 °C</span><span>Check site: hot-humid, 26–33 °C</span><span>Design day: 21 June</span><span>Models: two-band IR + Monte-Carlo optics + FV conduction</span></div>
+</header>
+
+<!-- ============ PARAMETRIC MODEL ============ -->
+<section style="border-top:0;padding-top:8px">
+  <div class="model">
+    <div class="stack" style="gap:12px;min-width:0">
+      <div class="viewport" id="vp"><div class="hint">drag to orbit · scroll to zoom · plate drawn with its 3 m tile joints</div></div>
+      <div class="cellrow">
+        <div class="viewport cellview" id="cv"><div class="hint">skin cell, 3 × 3 patch · orange cone = acceptance θₐ</div></div>
+        <div class="card stack" style="gap:8px">
+          <h3>Live performance estimate</h3>
+          <div class="kpis">
+            <div class="kpi big"><div class="v" id="k_day">–</div><div class="k">heat rejected to sky per design day</div></div>
+            <div class="kpi"><div class="v" id="k_spec">–</div><div class="k">per m² plate</div></div>
+            <div class="kpi"><div class="v" id="k_floor">–</div><div class="k">24 h mean per m² floor</div></div>
+            <div class="kpi"><div class="v" id="k_tank">–</div><div class="k">store for 6 K swing</div></div>
+            <div class="kpi"><div class="v" id="k_pen">–</div><div class="k">camber + cell penalty</div></div>
+          </div>
+          <p class="muted" style="font-size:12px">Interpolated from the CAE-6 design-day runs (selective emitter + wind-screen) and the CAE-7 camber study. Acceptance angles below 60° fall outside the run set and are held at the 60° value.</p>
+        </div>
+      </div>
+    </div>
+    <div class="card ctrl" id="ctrl">
+      <h3>Driving parameters</h3>
+      <label for="p_x">Plate E–W length <output id="o_x"></output><input type="range" id="p_x" min="24" max="120" step="6" value="72"></label>
+      <label for="p_y">Plate N–S depth <output id="o_y"></output><input type="range" id="p_y" min="24" max="96" step="6" value="48"></label>
+      <label for="p_h">Edge height <output id="o_h"></output><input type="range" id="p_h" min="4.5" max="10" step="0.5" value="6"></label>
+      <label for="p_c">Camber, rise / span <output id="o_c"></output><input type="range" id="p_c" min="0" max="0.12" step="0.01" value="0.04"></label>
+      <label for="p_g">Tree-column grid <output id="o_g"></output><input type="range" id="p_g" min="9" max="15" step="3" value="12"></label>
+      <label for="p_a">Cell acceptance θₐ <output id="o_a"></output><input type="range" id="p_a" min="40" max="89" step="1" value="85"></label>
+      <label for="p_w">Loop water temperature <output id="o_w"></output><input type="range" id="p_w" min="16" max="26" step="1" value="20"></label>
+      <label for="p_s">Climate<select id="p_s"><option value="0">Hot-dry, τ₀ = 0.75</option><option value="1">Hot-humid, τ₀ = 0.55</option></select></label>
+      <div class="kpis" style="border-top:1px solid var(--rule);padding-top:10px">
+        <div class="kpi"><div class="v" id="d_area">–</div><div class="k">plate area</div></div>
+        <div class="kpi"><div class="v" id="d_floor">–</div><div class="k">enclosed floor</div></div>
+        <div class="kpi"><div class="v" id="d_rise">–</div><div class="k">camber rise</div></div>
+        <div class="kpi"><div class="v" id="d_cell">–</div><div class="k">cell wall height</div></div>
+        <div class="kpi"><div class="v" id="d_cols">–</div><div class="k">tree columns</div></div>
+        <div class="kpi"><div class="v" id="d_cells">–</div><div class="k">skin cells</div></div>
+      </div>
+      <p class="muted" style="font-size:12px">The same rules drive <code>breeze/cad.py</code> and <code>cad/zenith_plate.scad</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VERDICT ============ -->
+<section>
+  <div class="grid2">
+    <div class="stack">
+      <div class="eyebrow">Verdict</div>
+      <h2>Shape the envelope like the sky, not like a radiator</h2>
+      <p class="prose">Radiation does not care how much surface a building has. It cares about how much projected area the envelope shows to each direction, weighted by how cold the sky is in that direction. The sky is cold only in a cone around the zenith, in the 8–13 µm atmospheric window. So the optimal envelope is a horizontal, plot-filling emitter, and everything that looks sideways or down should be an infrared mirror.</p>
+      <p class="prose verdict">I started with a second hypothesis: that angle-selective mirror cavities in the skin would beat a flat emitter. The ray tracing falsified that for buildings. Spectral selectivity beats angular selectivity once mirror losses and the extra absorbed sun are counted. The optimiser opened the cavities to about 85°, where they turn into the rib grid that holds the wind-screen.</p>
+    </div>
+    <div class="stack" style="gap:16px">
+      <div class="finding"><span class="n" id="f1">−76 kW</span><p><b>A 60 m tower gains heat.</b> At 8 K below ambient, a tower with the same volume and skin as the plate is a net heat <i>gainer</i>. Its walls see warm ground and horizon. A slab of the same volume rejects +177 kW (CAE-2).</p></div>
+      <div class="finding"><span class="n">0.44</span><p><b>kWh m⁻² per day at 20 °C water</b> (hot-dry) for the final skin. That is 4.6× an open PDRC roof (0.096) and 7× a white roof (0.06) (CAE-6).</p></div>
+      <div class="finding"><span class="n">−3 %</span><p><b>Cost of the structural camber.</b> A rise/span of 0.04 costs 0.2–2.5 % of night emission, and it buys shell stiffness and drainage (CAE-7).</p></div>
+      <div class="finding"><span class="n">10 K</span><p><b>The plate's whole temperature budget.</b> Flux falls to zero about 10 K below the water temperature (q/hᵣ). Conduction to the emitter has to cost well under 1 K, so channels sit at 150 mm in 1.5 mm aluminium (CAE-4).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THEORY ============ -->
+<section>
+  <div class="stack prose">
+    <div class="eyebrow">Hypothesis · reasoning</div>
+    <h2>The governing identity</h2>
+    <p>A black convex body emits Aₚ(ω)·L into each direction ω, where Aₚ is its projected area seen from ω. Its faces cannot see each other, so its net exchange with the surroundings is exactly:</p>
+  </div>
+  <div class="stack" style="margin-top:14px;max-width:820px">
+    <div class="eq">P = ∫<sub>4π</sub> <b>Aₚ(ω)</b> · ΔL(ω) dω<br>
+ΔL(θ) = Σ<sub>bands</sub> ε<sub>b</sub> [ B<sub>b</sub>(T<sub>s</sub>) − (1 − τ<sub>b</sub>(θ)) B<sub>b</sub>(T<sub>a</sub>) ] ,   τ<sub>W</sub>(θ) = τ₀<sup>1/cos θ</sup> (8–13 µm),  τ<sub>NW</sub> = 0</div>
+    <p class="prose">So the envelope is a <b>projected-area filter</b> laid over the sky's <b>coldness pattern</b> ΔL. Three consequences follow, and the CAE below tests each one.</p>
+  </div>
+  <div class="hyp" style="margin-top:18px">
+    <div class="card"><h3>H1 · Massing</h3><p>Put projected area where ΔL is largest and positive, near the zenith. No convex shape beats the plot area seen from the zenith. Walls and soffits see θ &gt; θ₀, where the sky turns into a heat source. Prediction: low, broad, horizontal massing, with sideways surfaces made low-ε.</p><p style="margin-top:8px"><span class="tag ok">Confirmed · CAE-1, 2, 7</span></p></div>
+    <div class="card"><h3>H2 · Skin micro-geometry</h3><p>Mirror-walled cavities with acceptance θₐ ≈ θ₀ can shape Aₚ(ω) in a way no convex body can. They pass the zenith cone and reflect the horizon. Prediction: a funnel skin outperforms a flat emitter.</p><p style="margin-top:8px"><span class="tag part">Only deep sub-ambient, broadband</span> <span class="tag no">Falsified at system level · CAE-3, 6</span></p></div>
+    <div class="card"><h3>H3 · Scale freedom</h3><p>Geometric optics has no length scale above λ ≈ 10 µm. Cell size can therefore be set by film span, convection suppression and fabrication rather than by optics: 300 mm cells, 26 mm ribs. The macro scale (camber) can serve structure.</p><p style="margin-top:8px"><span class="tag ok">Used in design · CAE-4, 5</span></p></div>
+  </div>
+</section>
+
+<!-- ============ CAE-1 ============ -->
+<section>
+  <div class="stack prose"><div class="eyebrow">CAE-1 · sky model</div><h2>The sky is cold only overhead</h2>
+  <p>Two-band clear-sky model. The window transmits τ₀<sup>1/cos θ</sup>, and the rest of the IR spectrum is opaque at air temperature. Hemispherical sky emissivity comes out at <span class="mono" id="epsky"></span>. The useful cone narrows quickly as the surface is pulled below ambient, and much faster in humid air.</p></div>
+  <div class="grid3" style="margin-top:18px">
+    <div class="fig"><h3>Coldness pattern π·ΔL(θ), hot-dry</h3><div id="c_dl"></div><div class="legend" id="l_dl"></div><p class="cap">W m⁻² per π sr. Negative means the sky in that direction heats the surface.</p></div>
+    <div class="fig"><h3>Useful-sky half-angle θ₀</h3><div id="c_x"></div><div class="legend" id="l_x"></div><p class="cap">Zenith angle where ΔL crosses zero. Humid air at −15 K leaves an 11° cone.</p></div>
+    <div class="fig"><h3>Flat-face net flux vs. tilt</h3><div id="c_tilt"></div><div class="legend" id="l_tilt"></div><p class="cap">0° = roof, 90° = wall, 180° = soffit. At −10 K a wall gives −24 W m⁻², against +36 for a roof.</p></div>
+  </div>
+</section>
+
+<!-- ============ CAE-2 ============ -->
+<section>
+  <div class="stack prose"><div class="eyebrow">CAE-2 · massing</div><h2>Eight envelopes, one volume, one skin</h2>
+  <p>Each shape encloses 24,000 m³ and wears the same PDRC skin (ε 0.96/0.90, α<sub>sol</sub> 0.04). The faces of each convex hull were integrated hourly over the design day against sky, ground and sun. Two operating modes are shown: a sub-ambient sink at ΔT = −8 K, which is a building cooling itself, and above-ambient rejection at +15 K, which is process heat or a data hall.</p></div>
+  <div class="grid2" style="margin-top:18px">
+    <div class="fig"><h3>24 h mean net rejection, kW</h3><div id="c_mass"></div><div class="legend"><span><i style="background:var(--s1)"></i>sub-ambient (−8 K)</span><span><i style="background:var(--s2)"></i>above-ambient (+15 K) ÷ 10</span></div><p class="cap">Below ambient, only low, upward-facing shapes are sinks at all. Above ambient, every surface helps, so tall shapes win per m² of land and lose per m² of skin.</p></div>
+    <div class="fig tbl"><h3>Per unit of skin and of land</h3><table id="t_mass"></table><p class="cap">Above ambient the tower reaches 1,636 W per m² of land, but it needs 36 % more skin per watt than the low dome. Below ambient the land figure is set by the zenith projection, which is the plot.</p></div>
+  </div>
+</section>
+
+<!-- ============ CAE-3 ============ -->
+<section>
+  <div class="stack prose"><div class="eyebrow">CAE-3 · skin optics, Monte-Carlo ray tracing</div><h2>Testing the angle-selective cavity</h2>
+  <p>A vectorised 3-D ray tracer was written for this study. It models square inverted-pyramid funnels and East–West CPC troughs with specular walls (R<sub>IR</sub> 0.98, R<sub>sol</sub> 0.97). It traces 16,000 emission bundles from the emitter and also from the mirrors, which radiate through their 2 % emissivity. Reciprocity gives the net exchange per unit roof area. The tracer conserves energy to machine precision with ideal mirrors, and the flat cell reproduces the analytic result to 0.1 %.</p></div>
+  <div class="grid2" style="margin-top:18px">
+    <div class="fig"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3>Net IR per roof area vs. ΔT</h3>
+      <div class="seg" id="seg_cells" role="group" aria-label="climate and emitter"></div></div>
+      <div id="c_cells"></div><div class="legend" id="l_cells"></div>
+      <p class="cap">Funnels win only in the deep sub-ambient corner: +50 % at −15 K with a broadband emitter in dry air, and 4.8× the flat value at −10 K in humid air. With a selective emitter, cavities gain only in humid air at −15 K and below. Everywhere else the flat plate leads or is within 1 W m⁻².</p></div>
+    <div class="grid2" style="grid-template-columns:1fr;gap:16px">
+      <div class="fig"><h3>Aperture angular emittance</h3><div id="c_ang"></div><div class="legend" id="l_ang"></div><p class="cap">The 50° funnel cuts off sharply. The 2-D trough leaks along its axis, toward the East and West horizons.</p></div>
+      <div class="fig"><h3>Sun absorbed on 21 June, Wh m⁻² day⁻¹</h3><div id="c_sol"></div><p class="cap">Every mirror bounce absorbs 3 %. Funnels absorb about twice the sun of a flat PDRC sheet. That is the main reason H2 fails in daytime.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CAE-6 ============ -->
+<section>
+  <div class="stack prose"><div class="eyebrow">CAE-6 · system design day</div><h2>Whole roof systems, water loop in the loop</h2>
+  <p>Nine roof systems were run through the design day. Each counts IR (from CAE-3 optics), absorbed sun (Monte-Carlo, hourly sun path), convection (open: h = 2.8 + 3v at 2.5 m s⁻¹; under a 12 µm LDPE screen: 2.5 W m⁻²K⁻¹ with τ<sub>IR</sub> 0.85) and screen re-emission. A controller circulates water only when the plate is a net sink. The result is daily heat moved to the sky as a function of water temperature.</p></div>
+  <div class="grid2" style="margin-top:18px">
+    <div class="fig"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h3>Daily rejection vs. loop temperature</h3><div class="seg" id="seg_day" role="group" aria-label="climate"></div></div>
+      <div id="c_day"></div><div class="legend" id="l_day"></div><p class="cap">The rib grid at 85° (final design) comes within 3 % of a perfectly flat selective sheet, and it is the only one of the two that can carry the wind-screen.</p></div>
+    <div class="fig"><h3>Hourly net cooling, hot-dry, T<sub>w</sub> = 20 °C</h3><div id="c_hour"></div><div class="legend" id="l_hour"></div><p class="cap">Every system is a heat gain at noon, so the plate charges a buried store at night (05:00 peak) and idles by day. An open roof also loses most of its night to convection. The screen recovers it.</p></div>
+  </div>
+</section>
+
+<!-- ============ CAE-7 / CAE-4 ============ -->
+<section>
+  <div class="grid2">
+    <div class="stack"><div class="eyebrow">CAE-7 · macro curvature</div><h2>How much camber can the plate take?</h2>
+      <p class="prose">A spherical-cap plate over a fixed circular plot, emitting from its top surface only. Camber adds area, but that area faces the warmer oblique sky. Up to a rise/span of 0.06 the loss is under 4 % in every case, which buys shell action and gutter falls for free. Steep domes collapse below ambient in humid air.</p>
+      <div class="fig"><div id="c_cam"></div><div class="legend" id="l_cam"></div><p class="cap">Net IR per m² of land at night. Solid lines: selective emitter. Dashed: broadband.</p></div>
+    </div>
+    <div class="stack"><div class="eyebrow">CAE-4 · thermal FEA</div><h2>Feeding a 10 K budget</h2>
+      <p class="prose">A 2-D finite-volume conduction model of the emitter sheet runs from a roll-bond channel (h<sub>w</sub> = 800 W m⁻²K⁻¹) out to the emitter, which is linearised at hᵣ = 6 W m⁻²K⁻¹ about the water temperature. Flux falls to zero at about 10 K, so any conduction drop comes straight off the output. Aluminium roll-bond at one channel per 150 mm reaches 94 %. Printed UHPC needs a channel under every cell row, and polymer sheet is not viable.</p>
+      <div class="fig"><div id="c_fea"></div><div class="legend" id="l_fea"></div><p class="cap">Emitter efficiency η = Q / Q(T<sub>emitter</sub> = T<sub>w</sub>).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CAE-5 STRUCTURE ============ -->
+<section>
+  <div class="stack prose"><div class="eyebrow">CAE-5 · structure</div><h2>A plate that is mostly sky</h2>
+  <p>Load path: 3 × 3 m sandwich tiles span to purlins at 3 m. The purlins span 6 m to a two-way glulam grillage. The grillage nodes are the branch tips of steel tree columns at 12 m centres. With four diagonal branches reaching (±3, ±3) m, the tips of neighbouring trees form a uniform 6 m grid. Partial factors 1.35 G + 1.5 Q, with deflection limit L/200 for tiles and L/300 for beams.</p></div>
+  <div class="tbl" style="margin-top:16px"><table id="t_str"></table></div>
+</section>
+
+<!-- ============ MATERIALS ============ -->
+<section>
+  <div class="stack prose"><div class="eyebrow">Materials</div><h2>Every layer chosen for its spectrum</h2></div>
+  <div class="tbl" style="margin-top:16px"><table>
+    <thead><tr><th>Layer</th><th>Material</th><th>Key properties</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Wind-screen</td><td>12 µm LDPE film, UV-stabilised, on rib grid</td><td class="mono">τ<sub>IR</sub> 0.85 · τ<sub>sol</sub> 0.92 · 300 mm span</td><td>Cuts convective gain from about 10 to 2.5 W m⁻²K⁻¹. Worth +0.18 kWh m⁻² day⁻¹ at 20 °C, dry (CAE-6).</td></tr>
+      <tr><td>Emitter</td><td>SiO₂/Si₃N₄ multilayer, or SiC-loaded polymer on Al</td><td class="mono">ε<sub>8–13</sub> 0.95 · ε<sub>other</sub> 0.15 · α<sub>sol</sub> 0.05</td><td>Ignores the warm, opaque bands of the atmosphere. From −10 K down it beats broadband by 27–53 W m⁻² in dry air (CAE-3).</td></tr>
+      <tr><td>Ribs</td><td>0.3 mm Al, bright-rolled, nanoporous-PE overlay</td><td class="mono">R<sub>IR</sub> 0.98 · R<sub>sol</sub> 0.97 · 26 mm high</td><td>Film support and still-air cells. The overlay scatters sun before it reaches the metal.</td></tr>
+      <tr><td>Channel sheet</td><td>Roll-bond Al 1050, 2 × 0.75 mm</td><td class="mono">k 220 W m⁻¹K⁻¹ · channels @150 mm</td><td>η 0.94 (CAE-4). Made on refrigerator-evaporator lines.</td></tr>
+      <tr><td>Core</td><td>PIR foam, 80 mm</td><td class="mono">λ 0.022 · G 2.5 MPa · τ<sub>allow</sub> 120 kPa</td><td>Insulates the cold plate from the building and works as the sandwich web.</td></tr>
+      <tr><td>Soffit</td><td>0.7 mm Al, mill finish</td><td class="mono">ε 0.05</td><td>The soffit faces warm ground, where a −10 K surface would gain 55 W m⁻² if black. The mirror cuts that to about 3.</td></tr>
+      <tr><td>Enclosure walls</td><td>Insulated panels, polished Al outer skin</td><td class="mono">ε 0.05 · U 0.15</td><td>Walls see the horizon and must not exchange with it (CAE-1).</td></tr>
+      <tr><td>Grillage</td><td>Glulam GL28h</td><td class="mono">100×280 purlins · 200×280 primaries</td><td>Low embodied carbon. Sits in the shade, so its own temperature does not matter.</td></tr>
+      <tr><td>Tree columns</td><td>S355 CHS 273×8, branches CHS 168.3×8</td><td class="mono">utilisation 0.14 / 0.11</td><td>Kept slender for minimal sky obstruction. Sized for uplift and anchorage.</td></tr>
+      <tr><td>Store</td><td>Buried water tank, 250 m³</td><td class="mono">1.74 MWh at 6 K swing</td><td>The plate rejects at night. The building is cooled by day from the store.</td></tr>
+    </tbody></table></div>
+</section>
+
+<!-- ============ CONSTRUCTION ============ -->
+<section>
+  <div class="stack prose"><div class="eyebrow">Construction</div><h2>A roof made on coil lines, not on site</h2></div>
+  <div class="grid3" style="margin-top:16px">
+    <div class="card stack" style="gap:8px"><h3>Coil-to-tile skin line</h3><p>Roll-bonded channel sheet is coil-coated with the selective emitter, roll-to-roll. Ribs are stamped from a second coil and laser-welded at the cell corners. The PIR core and soffit are laminated on a continuous sandwich press. The LDPE screen is heat-sealed to the rib tops under slight tension. The result is a 3 × 3 m tile of about 10 kg m⁻² (15 assumed in design), plumbed by two push-fit manifold stubs.</p></div>
+    <div class="card stack" style="gap:8px"><h3>Doubly-curved from flat tiles</h3><p>The product-parabola camber (rise 1.9 m over 48 m) has a minimum radius of about 150 m. A 3 m tile deviates from the surface by at most 8 mm along an edge, so flat tiles sit on purlin seatings cut to the surface. The grillage is CNC-cut from the same surface definition the CAD exports. The geometry costs nothing to build and gives drainage to all four edges.</p></div>
+    <div class="card stack" style="gap:8px"><h3>Variants for other sites</h3><p>In humid climates the CAD's acceptance slider moves to 55–65° with a broadband emitter. There, cavities are the only skin that stays net-positive at 10 K below ambient (CAE-3). For a low-cost build, 3-D-printed UHPC tiles with a printed duct under every cell row reach η 0.77 (CAE-4).</p></div>
+  </div>
+</section>
+
+<!-- ============ LIMITS ============ -->
+<section>
+  <div class="grid2">
+    <div class="stack"><div class="eyebrow">Limits of this study</div><h2>What would change the answer</h2>
+      <ul class="tight prose">
+        <li>The sky model is a clear-sky, two-band Beer–Lambert model. Cloud cover removes the window, which a MODTRAN run per site would capture.</li>
+        <li>Convection is lumped, and the film's own temperature is set at T<sub>a</sub> − 2 K. CFD of the screened cell is the next step.</li>
+        <li>The massing study treats an isolated building. In a dense city, neighbours fill the horizon, which strengthens H1.</li>
+        <li>Structural checks are hand-calc level. A shell FE model of the cambered grillage, with wind tunnel or CFD pressure coefficients for the open canopy, comes next.</li>
+        <li>Dew and dust on the film (soiling) are not modelled. Expect 5–15 % loss without washing.</li>
+      </ul></div>
+    <div class="stack"><div class="eyebrow">Design rule</div><h2>Floors per plot</h2>
+      <p class="prose">The sky cooling a site can capture is capped by its plan area. A hot-dry plot gives about 0.44–0.59 kWh m⁻² day⁻¹ at 20–22 °C water. An efficient building's sensible cooling need is about 0.5–0.7 kWh per m² of floor per day. So radiative self-sufficiency allows <b>one to two storeys under the plate</b>. Above ambient the rule flips: when rejecting process heat at +15 K, tall shapes buy land efficiency at the cost of skin.</p>
+      <div class="eq" style="font-size:13px">N<sub>floors</sub> ≲ q<sub>plate</sub> · A<sub>plate</sub> / (q<sub>load</sub> · A<sub>floor</sub>)</div>
+    </div>
+  </div>
+</section>
+
+<footer class="stack" style="gap:6px">
+  <div>Code, CAD and raw results are in the <span class="mono">istome/breeze</span> repository, branch <span class="mono">claude/epic-noether-6qdj2x</span>: <span class="mono">breeze/</span> (physics, ray tracer, CAD), <span class="mono">cae/</span> (s1–s7), <span class="mono">cad/zenith_plate.scad</span>, OBJ and STL.</div>
+  <div>All figures on this page come from the result JSON produced by those scripts.</div>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const D = /*DATA*/null;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const S = ["--s1","--s2","--s3","--s4","--s5","--s6","--s7","--s8","--s9"];
+const $ = id => document.getElementById(id);
+const fmt = (v, d=1) => Number(v).toLocaleString("en-US", {minimumFractionDigits:d, maximumFractionDigits:d});
+
+/* ---------------- tiny SVG chart kit ---------------- */
+function nice(lo, hi, n=5){const span=hi-lo||1;const step0=span/n;const mag=Math.pow(10,Math.floor(Math.log10(step0)));const st=[1,2,2.5,5,10].map(s=>s*mag).find(s=>s>=step0);const a=Math.floor(lo/st)*st, b=Math.ceil(hi/st)*st;const t=[];for(let v=a;v<=b+st*1e-6;v+=st)t.push(+v.toFixed(10));return t;}
+function line(el, o){
+  const W=o.w||520,H=o.h||300,m={l:52,r:14,t:12,b:40};
+  const xs=o.series.flatMap(s=>s.x||o.x), ys=o.series.flatMap(s=>s.y).filter(v=>v!=null&&isFinite(v));
+  const xt=o.xt||nice(Math.min(...xs),Math.max(...xs),6), yt=o.yt||nice(Math.min(...ys,o.ymin??Infinity),Math.max(...ys,o.ymax??-Infinity),5);
+  const X=v=>m.l+(v-xt[0])/(xt.at(-1)-xt[0])*(W-m.l-m.r), Y=v=>H-m.b-(v-yt[0])/(yt.at(-1)-yt[0])*(H-m.t-m.b);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.label||""}">`;
+  yt.forEach(v=>{s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--rule)" stroke-width="${v===0?1.4:0.7}" ${v===0?'':''}/><text x="${m.l-6}" y="${Y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--mono)">${o.yf?o.yf(v):v}</text>`;});
+  if(yt[0]<0&&yt.at(-1)>0)s+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--ink)" stroke-width="0.9" opacity="0.6"/>`;
+  xt.forEach(v=>{s+=`<text x="${X(v)}" y="${H-m.b+16}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--mono)">${o.xf?o.xf(v):v}</text>`;});
+  s+=`<text x="${(m.l+W-m.r)/2}" y="${H-6}" text-anchor="middle" font-size="11.5" fill="var(--muted)">${o.xl}</text>`;
+  s+=`<text transform="translate(13 ${(m.t+H-m.b)/2}) rotate(-90)" text-anchor="middle" font-size="11.5" fill="var(--muted)">${o.yl}</text>`;
+  (o.bands||[]).forEach(b=>{s+=`<rect x="${X(b[0])}" y="${m.t}" width="${X(b[1])-X(b[0])}" height="${H-m.t-m.b}" fill="var(--s3)" opacity="0.09"/>`});
+  o.series.forEach((sr,i)=>{const xx=sr.x||o.x;const pts=sr.y.map((v,j)=>v==null?null:[X(xx[j]),Y(Math.max(Math.min(v,yt.at(-1)),yt[0]))]).filter(Boolean);
+    const c=`var(${sr.c||S[i%S.length]})`;
+    s+=`<polyline points="${pts.map(p=>p.map(q=>q.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="${c}" stroke-width="${sr.w||1.9}" ${sr.dash?'stroke-dasharray="5 4"':''} stroke-linejoin="round"/>`;
+    if(sr.dots)pts.forEach(p=>s+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" fill="${c}"/>`);});
+  el.innerHTML=s+"</svg>";
+  if(o.leg){o.leg.innerHTML=o.series.map((sr,i)=>`<span><i style="background:var(${sr.c||S[i%S.length]})${sr.dash?';opacity:.6':''}"></i>${sr.n}</span>`).join("");}
+}
+
+/* ---------------- CAE-1 ---------------- */
+$("epsky").textContent = `${D.sky.eps_sky["tau0.75"]} (dry) and ${D.sky.eps_sky["tau0.55"]} (humid)`;
+const dts=["-15","-10","-5","0","10"];
+line($("c_dl"),{x:D.sky.theta,series:dts.map((k,i)=>({n:`ΔT ${+k>0?"+":""}${k} K`,y:D.sky.dL[k],c:S[i]})),xl:"zenith angle θ (°)",yl:"π·ΔL (W m⁻²)",xt:[0,15,30,45,60,75,90],leg:$("l_dl"),w:380,h:290});
+line($("c_x"),{series:[{n:"dry τ₀ 0.75",x:D.sky.crossover["tau0.75"].dT,y:D.sky.crossover["tau0.75"].th,c:"--s1"},{n:"humid τ₀ 0.55",x:D.sky.crossover["tau0.55"].dT,y:D.sky.crossover["tau0.55"].th,c:"--s2"}],xl:"surface − ambient ΔT (K)",yl:"θ₀ (°)",yt:[0,15,30,45,60,75,90],leg:$("l_x"),w:380,h:290});
+line($("c_tilt"),{x:D.tilt.beta,series:dts.concat(["25"]).map((k,i)=>({n:`ΔT ${+k>0?"+":""}${k} K`,y:D.tilt.q[k],c:S[i]})),xl:"face tilt β from upward (°)",yl:"net flux q (W m⁻²)",xt:[0,30,60,90,120,150,180],leg:$("l_tilt"),w:380,h:290});
+
+/* ---------------- CAE-2 ---------------- */
+(function(){const rows=D.massing.slice().sort((a,b)=>b.sub-a.sub);const W=520,rh=30,H=rows.length*rh+40,m={l:190,r:16};
+  const lo=-100,hi=250,X=v=>m.l+(v-lo)/(hi-lo)*(W-m.l-m.r);let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  [-100,-50,0,50,100,150,200].forEach(v=>{s+=`<line x1="${X(v)}" x2="${X(v)}" y1="6" y2="${H-28}" stroke="var(--rule)" stroke-width="${v===0?1.3:0.7}"/><text x="${X(v)}" y="${H-12}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--mono)">${v}</text>`});
+  rows.forEach((r,i)=>{const y=10+i*rh;const sub=r.sub, ab=r.above/10;
+    s+=`<text x="${m.l-8}" y="${y+14}" text-anchor="end" font-size="12" fill="var(--ink)">${r.shape.replace(" (inverted frustum)","")}</text>`;
+    s+=`<rect x="${Math.min(X(0),X(sub))}" y="${y+2}" width="${Math.abs(X(sub)-X(0))}" height="10" fill="${sub<0?"var(--bad)":"var(--s1)"}"/>`;
+    s+=`<rect x="${X(0)}" y="${y+14}" width="${X(ab)-X(0)}" height="7" fill="var(--s2)" opacity="0.8"/>`;
+    s+=`<text x="${sub<0?X(sub)-4:X(sub)+4}" y="${y+11}" text-anchor="${sub<0?"end":"start"}" font-size="10.5" fill="var(--muted)" font-family="var(--mono)">${fmt(sub)}</text>`;});
+  $("c_mass").innerHTML=s+"</svg>";
+  $("t_mass").innerHTML=`<thead><tr><th>Shape</th><th>H m</th><th>Skin m²</th><th>−8 K W/m² skin</th><th>−8 K W/m² land</th><th>+15 K W/m² skin</th><th>+15 K W/m² land</th></tr></thead><tbody>`+
+  D.massing.map(r=>`<tr><td>${r.shape.replace(" (inverted frustum)","")}</td><td class="num">${fmt(r.H)}</td><td class="num">${r.A_env.toLocaleString("en-US")}</td><td class="num" style="color:${r.sub_env<0?"var(--bad)":"inherit"}">${fmt(r.sub_env)}</td><td class="num" style="color:${r.sub_foot<0?"var(--bad)":"inherit"}">${fmt(r.sub_foot)}</td><td class="num">${fmt(r.above_env)}</td><td class="num">${fmt(r.above_foot,0)}</td></tr>`).join("")+"</tbody>";})();
+
+/* ---------------- CAE-3 ---------------- */
+const cellKeys=[["tau0.75/broadband","dry · broadband"],["tau0.75/selective","dry · selective"],["tau0.55/broadband","humid · broadband"],["tau0.55/selective","humid · selective"]];
+function drawCells(k){const q=D.cells.q[k];const pick=[["flat","flat emitter","--s9"],["funnel50","funnel 50°","--s1"],["funnel60","funnel 60°","--s3"],["funnel80","funnel 80°","--s4"],["trough60","CPC trough 60° (E–W)","--s2"]];
+  line($("c_cells"),{x:D.cells.dT,series:pick.map(p=>({n:p[1],y:q[p[0]],c:p[2],dots:true,dash:p[0]==="trough60"})),xl:"surface − ambient ΔT (K)",yl:"net IR per roof m² (W)",leg:$("l_cells")});}
+$("seg_cells").innerHTML=cellKeys.map((c,i)=>`<button type="button" data-k="${c[0]}" aria-pressed="${i===0}">${c[1]}</button>`).join("");
+$("seg_cells").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;[...$("seg_cells").children].forEach(x=>x.setAttribute("aria-pressed",x===b));drawCells(b.dataset.k);});
+drawCells("tau0.75/broadband");
+const angK=Object.keys(D.cells.angular);
+line($("c_ang"),{h:230,series:angK.map((k,i)=>({n:k,x:D.cells.angular[k].th,y:D.cells.angular[k].eps,c:S[i]})),xl:"emission zenith angle (°)",yl:"ε(θ)",xt:[0,15,30,45,60,75,90],yt:[0,0.25,0.5,0.75,1,1.25],leg:$("l_ang")});
+(function(){const e=Object.entries(D.cells.solar_daily_Wh);const W=520,H=40+e.length*30,m={l:120,r:50};const hi=800;const X=v=>m.l+v/hi*(W-m.l-m.r);let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  e.forEach(([k,v],i)=>{const y=8+i*30;s+=`<text x="${m.l-8}" y="${y+14}" text-anchor="end" font-size="12" fill="var(--ink)">${k}</text><rect x="${m.l}" y="${y+3}" width="${X(v)-m.l}" height="14" fill="${k==="flat"?"var(--s3)":"var(--s2)"}"/><text x="${X(v)+5}" y="${y+14}" font-size="11" fill="var(--muted)" font-family="var(--mono)">${v}</text>`});
+  [0,200,400,600,800].forEach(v=>s+=`<text x="${X(v)}" y="${H-8}" text-anchor="middle" font-size="10.5" fill="var(--muted)" font-family="var(--mono)">${v}</text>`);
+  $("c_sol").innerHTML=s+"</svg>";})();
+
+/* ---------------- CAE-6 ---------------- */
+const siteNames=Object.keys(D.day.sites);
+const sysColor={"Dark membrane roof":"--s9","White roof (open)":"--s6","PDRC flat (open)":"--s8","PDRC flat + film":"--s5","Selective flat + film":"--s3","Zenith cell 60° PDRC + film":"--s7","Zenith cell 60° selective + film":"--s4","Zenith cell 75° selective + film":"--s2","Rib grid 85° selective + film (final)":"--s1"};
+function drawDay(si){const sys=D.day.sites[siteNames[si]].systems;
+  line($("c_day"),{x:D.day.Tw,series:Object.entries(sys).map(([k,v])=>({n:k,y:v.daily,c:sysColor[k],dots:true,w:k.includes("final")?3:1.6,dash:k.includes("Zenith")})),xl:"loop water temperature T_w (°C)",yl:"kWh m⁻² day⁻¹",leg:$("l_day")});}
+$("seg_day").innerHTML=["hot-dry","hot-humid"].map((n,i)=>`<button type="button" data-i="${i}" aria-pressed="${i===0}">${n}</button>`).join("");
+$("seg_day").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;[...$("seg_day").children].forEach(x=>x.setAttribute("aria-pressed",x===b));drawDay(+b.dataset.i);});
+drawDay(0);
+(function(){const sys=D.day.sites[siteNames[0]].systems;const pick=["White roof (open)","PDRC flat (open)","PDRC flat + film","Zenith cell 60° PDRC + film","Rib grid 85° selective + film (final)"];
+  line($("c_hour"),{x:D.day.hours,series:pick.map(k=>({n:k,y:sys[k].hourly,c:sysColor[k],w:k.includes("final")?2.8:1.6})),xl:"hour of day",yl:"net cooling (W m⁻²)",xt:[0,4,8,12,16,20,24],yt:[-150,-100,-50,0,50,100],leg:$("l_hour")});})();
+
+/* ---------------- CAE-7 / CAE-4 ---------------- */
+(function(){const cs=Object.entries(D.camber.cases);line($("c_cam"),{x:D.camber.ratio,series:cs.map(([k,v],i)=>({n:k.replace("τ₀=0.75","dry").replace("τ₀=0.55","humid"),y:v,c:S[[0,0,1,1,2,2,3,3][i]],dash:k.includes("broadband"),w:k.includes("broadband")?1.3:2})),xl:"rise / span",yl:"W per m² land",bands:[[0,0.06]],xt:[0,0.1,0.2,0.3,0.4,0.5],leg:$("l_cam")});})();
+(function(){const f=Object.entries(D.fea);line($("c_fea"),{series:f.map(([k,v],i)=>({n:k,x:v.pitch,y:v.eta,c:S[i],dots:true})),xl:"channel pitch (m)",yl:"emitter efficiency η",yt:[0,0.2,0.4,0.6,0.8,1],xt:[0,0.3,0.6,0.9,1.2,1.5,1.8],leg:$("l_fea")});})();
+
+/* ---------------- CAE-5 table ---------------- */
+(function(){const t=D.structure;const r=(a,b,c,d,ok)=>`<tr><td>${a}</td><td>${b}</td><td class="num">${c}</td><td class="num">${d}</td><td><span class="tag ${ok?"ok":"no"}">${ok?"pass":"check"}</span></td></tr>`;
+  $("t_str").innerHTML=`<thead><tr><th>Element</th><th>Section</th><th>Demand</th><th>Capacity / limit</th><th></th></tr></thead><tbody>`+
+  r("Tile, gravity SLS 0.75 kPa","Al 1.5 / PIR 80 / Al 0.7, 3 m span",fmt(t.chosen_tile.defl_mm)+" mm","15.0 mm",true)+
+  r("Tile, wind uplift 1.2 kPa","″",fmt(t.chosen_tile.uplift_defl_mm)+" mm","15.0 mm",true)+
+  r("Tile face stress vs. wrinkling","″",fmt(t.chosen_tile.sig_top_MPa)+" MPa",fmt(t.chosen_tile.wrinkle_MPa)+" MPa",true)+
+  r("Tile core shear","″",fmt(t.chosen_tile.tau_core_kPa)+" kPa",fmt(t.chosen_tile.tau_allow_kPa,0)+" kPa",true)+
+  r("Purlin, 6 m span, 3 m trib.","GL28h 100 × 280 (req. "+Math.round(t.purlin.h_req_mm)+")",fmt(t.purlin.M_kNm)+" kNm","deflection governs",true)+
+  r("Grillage, 6 m span, 6 m trib.","GL28h 200 × 280 (req. "+Math.round(t.primary.h_req_mm)+")",fmt(t.primary.M_kNm)+" kNm","deflection governs",true)+
+  r("Tree trunk, 144 m² trib.",t.trunk.section,fmt(t.trunk.N_Ed_kN,0)+" kN",fmt(t.trunk.N_bRd_kN,0)+" kN",true)+
+  r("Tree branch",t.branch.section,fmt(t.branch.N_Ed_kN,0)+" kN",fmt(t.branch.N_bRd_kN,0)+" kN",true)+
+  r("Uplift at column base","anchored pile cap",fmt(t.uplift.net_uplift_per_col_kN,0)+" kN","design anchorage",false)+
+  r("Tile thermal movement, 60 K","slip joint at tile edge",fmt(t.tile_thermal_movement_mm)+" mm","≥ 6 mm joint",true)+"</tbody>";})();
+
+/* ---------------- parametric model ---------------- */
+const P={x:72,y:48,h:6,c:0.04,g:12,a:85,w:20,s:0,pitch:0.30,inset:6,encH:4.2,depth:0.0822,beam:0.28,fork:2.2};
+const sysByA=[[60,"Zenith cell 60° selective + film"],[75,"Zenith cell 75° selective + film"],[85,"Rib grid 85° selective + film (final)"],[90,"Selective flat + film"]];
+function interp(xs,ys,x){if(x<=xs[0])return ys[0];if(x>=xs.at(-1))return ys.at(-1);for(let i=1;i<xs.length;i++)if(x<=xs[i]){const t=(x-xs[i-1])/(xs[i]-xs[i-1]);return ys[i-1]+t*(ys[i]-ys[i-1]);}}
+function dailyPerM2(){const sys=D.day.sites[siteNames[P.s]].systems;const at=k=>interp(D.day.Tw,sys[k].daily,P.w);
+  const as=sysByA.map(v=>v[0]), vs=sysByA.map(v=>at(v[1]));const q=interp(as,vs,Math.max(60,P.a));
+  const flat=at("Selective flat + film");
+  const cam=D.camber.cases[P.s===0?"τ₀=0.75 selective ΔT=-12":"τ₀=0.55 selective ΔT=-12"];const camR=interp(D.camber.ratio,cam,P.c)/cam[0];
+  return {q:q*camR, pen: flat>0? 1-(q*camR)/flat : 0};}
+function plateZ(x,y){const rise=P.c*Math.min(P.x,P.y);return P.h+rise*(1-(2*x/P.x)**2)*(1-(2*y/P.y)**2);}
+const ids=[["p_x","x","o_x",v=>v+" m"],["p_y","y","o_y",v=>v+" m"],["p_h","h","o_h",v=>v.toFixed(1)+" m"],["p_c","c","o_c",v=>v.toFixed(2)],["p_g","g","o_g",v=>v+" m"],["p_a","a","o_a",v=>v+"°"],["p_w","w","o_w",v=>v+" °C"]];
+function updateText(){ids.forEach(([i,k,o,f])=>{$(o).textContent=f(P[k]);});
+  const area=P.x*P.y, floor=Math.max(0,P.x-2*P.inset)*Math.max(0,P.y-2*P.inset);const r=dailyPerM2();const day=r.q*area;
+  const e=0.5*P.pitch*Math.sin(P.a*Math.PI/180), ch=(0.5*P.pitch+e)/Math.tan(P.a*Math.PI/180);
+  $("d_area").textContent=area.toLocaleString("en-US")+" m²";$("d_floor").textContent=floor.toLocaleString("en-US")+" m²";
+  $("d_rise").textContent=(P.c*Math.min(P.x,P.y)).toFixed(2)+" m";$("d_cell").textContent=(ch*1000).toFixed(0)+" mm";
+  $("d_cols").textContent=Math.floor(P.x/P.g)*Math.floor(P.y/P.g);$("d_cells").textContent=(Math.round(P.x/P.pitch)*Math.round(P.y/P.pitch)).toLocaleString("en-US");
+  $("k_day").textContent=day>=1000?(day/1000).toFixed(2)+" MWh":day.toFixed(0)+" kWh";$("k_spec").textContent=r.q.toFixed(3)+" kWh";
+  $("k_floor").textContent=floor>0?(day*1000/24/floor).toFixed(1)+" W":"–";$("k_tank").textContent=Math.round(day*3.6e6/(4186*6*1000))+" m³";
+  $("k_pen").textContent=(r.pen*100).toFixed(1)+" %";}
+ids.forEach(([i,k])=>$(i).addEventListener("input",e=>{P[k]=+e.target.value;updateText();queue();}));
+$("p_s").addEventListener("change",e=>{P.s=+e.target.value;updateText();});
+updateText();
+
+let scene,cam,ren,ctl,group,cscene,ccam,cren,cctl,cgroup,pending=false;
+function col(n){return new THREE.Color(css(n));}
+function initThree(){if(!window.THREE)return;
+  const vp=$("vp");ren=new THREE.WebGLRenderer({antialias:true});ren.setPixelRatio(Math.min(2,devicePixelRatio));vp.prepend(ren.domElement);
+  scene=new THREE.Scene();cam=new THREE.PerspectiveCamera(35,1.6,0.5,2000);cam.position.set(64,17,70);
+  ctl=new THREE.OrbitControls(cam,ren.domElement);ctl.target.set(0,3.5,0);ctl.enableDamping=true;ctl.maxPolarAngle=Math.PI*0.495;
+  scene.add(new THREE.HemisphereLight(0xdfe8ff,0x5a5246,0.6));const sun=new THREE.DirectionalLight(0xffffff,0.6);sun.position.set(40,90,-30);scene.add(sun);
+  group=new THREE.Group();scene.add(group);
+  const cv=$("cv");cren=new THREE.WebGLRenderer({antialias:true});cren.setPixelRatio(Math.min(2,devicePixelRatio));cv.prepend(cren.domElement);
+  cscene=new THREE.Scene();ccam=new THREE.PerspectiveCamera(32,4/3,0.01,50);ccam.position.set(0.9,0.75,1.05);
+  cctl=new THREE.OrbitControls(ccam,cren.domElement);cctl.target.set(0,0.03,0);cctl.enableDamping=true;
+  cscene.add(new THREE.HemisphereLight(0xffffff,0x555555,0.85));const l2=new THREE.DirectionalLight(0xffffff,0.6);l2.position.set(1,2,1);cscene.add(l2);
+  cgroup=new THREE.Group();cscene.add(cgroup);
+  new ResizeObserver(resize).observe(vp);new ResizeObserver(resize).observe(cv);
+  build();resize();animate();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>build());
+  new MutationObserver(()=>build()).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+}
+function resize(){if(!ren)return;const vp=$("vp"),cv=$("cv");ren.setSize(vp.clientWidth,vp.clientHeight,false);cam.aspect=vp.clientWidth/vp.clientHeight;cam.updateProjectionMatrix();
+  cren.setSize(cv.clientWidth,cv.clientHeight,false);ccam.aspect=cv.clientWidth/cv.clientHeight;ccam.updateProjectionMatrix();}
+function queue(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;build();});}
+const V=(x,y,z)=>new THREE.Vector3(x,z,-y);
+function strut(a,b,r,mat){const d=new THREE.Vector3().subVectors(b,a);const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,d.length(),10),mat);m.position.copy(a).addScaledVector(d,0.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());return m;}
+function clear(g){while(g.children.length){const c=g.children.pop();c.geometry&&c.geometry.dispose();}}
+function build(){if(!scene)return;clear(group);
+  scene.background=col("--scene-bg");cscene.background=col("--scene-bg");
+  const emit=new THREE.MeshStandardMaterial({color:0x2b3f8f,roughness:0.55,metalness:0.1,side:THREE.DoubleSide});
+  const soff=new THREE.MeshStandardMaterial({color:0xc8ced8,roughness:0.25,metalness:0.8,side:THREE.DoubleSide});
+  const wood=new THREE.MeshStandardMaterial({color:0x9a7448,roughness:0.8,side:THREE.DoubleSide});
+  const steel=new THREE.MeshStandardMaterial({color:0x5f6b7a,roughness:0.45,metalness:0.6});
+  const encl=new THREE.MeshStandardMaterial({color:0xdfe3e8,roughness:0.2,metalness:0.7});
+  const nx=48,ny=32;const pos=[],pos2=[],idx=[];
+  for(let i=0;i<=nx;i++)for(let j=0;j<=ny;j++){const x=-P.x/2+i*P.x/nx,y=-P.y/2+j*P.y/ny,z=plateZ(x,y);const a=V(x,y,z),b=V(x,y,z-P.depth-0.05);pos.push(a.x,a.y,a.z);pos2.push(b.x,b.y,b.z);}
+  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const a=i*(ny+1)+j,b=a+ny+1;idx.push(a,b,b+1,a,b+1,a+1);}
+  const mk=(p,m)=>{const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(p,3));g.setIndex(idx);g.computeVertexNormals();return new THREE.Mesh(g,m);};
+  group.add(mk(pos,emit));group.add(mk(pos2,soff));
+  // tile joints
+  const lp=[];const tl=3;for(let x=-P.x/2;x<=P.x/2+1e-6;x+=tl)for(let k=0;k<24;k++){const y0=-P.y/2+k*P.y/24,y1=y0+P.y/24;const a=V(x,y0,plateZ(x,y0)+0.03),b=V(x,y1,plateZ(x,y1)+0.03);lp.push(a.x,a.y,a.z,b.x,b.y,b.z);}
+  for(let y=-P.y/2;y<=P.y/2+1e-6;y+=tl)for(let k=0;k<36;k++){const x0=-P.x/2+k*P.x/36,x1=x0+P.x/36;const a=V(x0,y,plateZ(x0,y)+0.03),b=V(x1,y,plateZ(x1,y)+0.03);lp.push(a.x,a.y,a.z,b.x,b.y,b.z);}
+  const lg=new THREE.BufferGeometry();lg.setAttribute("position",new THREE.Float32BufferAttribute(lp,3));group.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:0x8fa3e6,transparent:true,opacity:0.55})));
+  // grillage ribbons
+  const g=P.g,h=g/2,rib=(pts)=>{const p=[],ii=[];pts.forEach(([x,y],k)=>{const zt=plateZ(x,y)-P.depth-0.05;const a=V(x,y,zt),b=V(x,y,zt-P.beam);p.push(a.x,a.y,a.z,b.x,b.y,b.z);if(k)ii.push(2*k-2,2*k-1,2*k,2*k-1,2*k+1,2*k);});const bg=new THREE.BufferGeometry();bg.setAttribute("position",new THREE.Float32BufferAttribute(p,3));bg.setIndex(ii);bg.computeVertexNormals();group.add(new THREE.Mesh(bg,wood));};
+  for(let x=-P.x/2+g/4;x<P.x/2;x+=h)rib(Array.from({length:25},(_,k)=>[x,-P.y/2+k*P.y/24]));
+  for(let y=-P.y/2+g/4;y<P.y/2;y+=h)rib(Array.from({length:37},(_,k)=>[-P.x/2+k*P.x/36,y]));
+  // trees
+  for(let x=-P.x/2+g/2;x<P.x/2;x+=g)for(let y=-P.y/2+g/2;y<P.y/2;y+=g){let zb=Infinity;[[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([dx,dy])=>zb=Math.min(zb,plateZ(x+dx*g/4,y+dy*g/4)));zb-=P.depth+0.05+P.beam;const fork=zb-P.fork;
+    group.add(strut(V(x,y,0),V(x,y,fork),0.137,steel));[[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([dx,dy])=>{const tx=x+dx*g/4,ty=y+dy*g/4;group.add(strut(V(x,y,fork),V(tx,ty,plateZ(tx,ty)-P.depth-0.05-P.beam),0.084,steel));});}
+  // enclosure, ground, tank
+  const ew=Math.max(0.1,P.x-2*P.inset),ed=Math.max(0.1,P.y-2*P.inset),eh=Math.min(P.encH,P.h-P.fork-P.beam-0.4);
+  const en=new THREE.Mesh(new THREE.BoxGeometry(ew,eh,ed),encl);en.position.set(0,eh/2,0);group.add(en);
+  const gr=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.MeshStandardMaterial({color:col("--ground"),roughness:1,transparent:true,opacity:0.88}));gr.rotation.x=-Math.PI/2;group.add(gr);
+  const rt=Math.sqrt(250/(Math.PI*5));const tk=new THREE.Mesh(new THREE.CylinderGeometry(rt,rt,5,40),new THREE.MeshStandardMaterial({color:0x4f86d6,transparent:true,opacity:0.55}));tk.position.set(0,-3.5,0);group.add(tk);
+  buildCell(emit);
+}
+function buildCell(){clear(cgroup);const p=0.3,t=p/2,th=P.a*Math.PI/180,e=t*Math.sin(th),hh=(t+e)/Math.tan(th);const sc=1/0.9;
+  const mir=new THREE.MeshStandardMaterial({color:0xe3e8ef,roughness:0.3,metalness:0.35,side:THREE.DoubleSide});
+  const em=new THREE.MeshStandardMaterial({color:0x22347a,roughness:0.6,side:THREE.DoubleSide});
+  const film=new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:0.12,side:THREE.DoubleSide});
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const cx=a*p*sc,cz=b*p*sc;
+    const B=[[-e,-e],[e,-e],[e,e],[-e,e]],T=[[-t,-t],[t,-t],[t,t],[-t,t]];const ps=[];
+    for(let i=0;i<4;i++){const j=(i+1)%4;const q=[[B[i],0],[B[j],0],[T[j],hh],[B[i],0],[T[j],hh],[T[i],hh]];q.forEach(([v,y])=>ps.push(cx+v[0]*sc,y*sc,cz+v[1]*sc));}
+    const gg=new THREE.BufferGeometry();gg.setAttribute("position",new THREE.Float32BufferAttribute(ps,3));gg.computeVertexNormals();cgroup.add(new THREE.Mesh(gg,mir));
+    const ep=new THREE.Mesh(new THREE.PlaneGeometry(2*e*sc,2*e*sc),em);ep.rotation.x=-Math.PI/2;ep.position.set(cx,0.001,cz);cgroup.add(ep);}
+  const fl=new THREE.Mesh(new THREE.PlaneGeometry(3*p*sc,3*p*sc),film);fl.rotation.x=-Math.PI/2;fl.position.y=hh*sc+0.002;cgroup.add(fl);
+  const sl=0.5,rr=sl*Math.sin(th),L=Math.max(0.01,sl*Math.cos(th));const cone=new THREE.Mesh(new THREE.ConeGeometry(rr,L,48,1,true),new THREE.MeshBasicMaterial({color:col("--heat"),transparent:true,opacity:0.16,side:THREE.DoubleSide,depthWrite:false}));
+  cone.rotation.x=Math.PI;cone.position.y=L/2+0.002;cgroup.add(cone);
+  const base=new THREE.Mesh(new THREE.BoxGeometry(3*p*sc,0.03,3*p*sc),new THREE.MeshStandardMaterial({color:0x9aa3b0,metalness:0.6,roughness:0.4}));base.position.y=-0.016;cgroup.add(base);}
+function animate(){requestAnimationFrame(animate);ctl.update();cctl.update();ren.render(scene,cam);cren.render(cscene,ccam);}
+try{initThree();}catch(err){$("vp").insertAdjacentHTML("beforeend",`<div class="hint" style="top:10px">3-D view unavailable: ${err.message}</div>`);}
+</script>

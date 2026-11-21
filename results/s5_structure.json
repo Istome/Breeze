@@ -1,0 +1,91 @@
+{
+ "tiles": [
+  {
+   "core_mm": 40.0,
+   "defl_mm": 22.2114468518692,
+   "limit_mm": 15.0,
+   "sig_top_MPa": 20.118613138686133,
+   "wrinkle_MPa": 44.18277961201801,
+   "tau_core_kPa": 40.237226277372265,
+   "tau_allow_kPa": 120.0,
+   "uplift_defl_mm": 31.096025592616883
+  },
+  {
+   "core_mm": 60.0,
+   "defl_mm": 11.858373393579782,
+   "limit_mm": 15.0,
+   "sig_top_MPa": 13.533142389525368,
+   "wrinkle_MPa": 44.18277961201801,
+   "tau_core_kPa": 27.06628477905074,
+   "tau_allow_kPa": 120.0,
+   "uplift_defl_mm": 16.601722751011692
+  },
+  {
+   "core_mm": 80.0,
+   "defl_mm": 7.757057800594167,
+   "limit_mm": 15.0,
+   "sig_top_MPa": 10.195745992601724,
+   "wrinkle_MPa": 44.18277961201801,
+   "tau_core_kPa": 20.39149198520345,
+   "tau_allow_kPa": 120.0,
+   "uplift_defl_mm": 10.859880920831833
+  },
+  {
+   "core_mm": 100.0,
+   "defl_mm": 5.651952962188034,
+   "limit_mm": 15.0,
+   "sig_top_MPa": 8.178783382789316,
+   "wrinkle_MPa": 44.18277961201801,
+   "tau_core_kPa": 16.357566765578632,
+   "tau_allow_kPa": 120.0,
+   "uplift_defl_mm": 7.912734147063248
+  },
+  {
+   "core_mm": 120.0,
+   "defl_mm": 4.399514097421446,
+   "limit_mm": 15.0,
+   "sig_top_MPa": 6.828034682080925,
+   "wrinkle_MPa": 44.18277961201801,
+   "tau_core_kPa": 13.65606936416185,
+   "tau_allow_kPa": 120.0,
+   "uplift_defl_mm": 6.159319736390024
+  }
+ ],
+ "chosen_tile": {
+  "core_mm": 80.0,
+  "defl_mm": 7.757057800594167,
+  "limit_mm": 15.0,
+  "sig_top_MPa": 10.195745992601724,
+  "wrinkle_MPa": 44.18277961201801,
+  "tau_core_kPa": 20.39149198520345,
+  "tau_allow_kPa": 120.0,
+  "uplift_defl_mm": 10.859880920831833
+ },
+ "purlin": {
+  "b_mm": 100.0,
+  "h_req_mm": 273.6454443486644,
+  "governs": "deflection",
+  "M_kNm": 16.70625
+ },
+ "primary": {
+  "b_mm": 200.0,
+  "h_req_mm": 273.6454443486644,
+  "governs": "deflection",
+  "M_kNm": 33.4125
+ },
+ "trunk": {
+  "N_Ed_kN": 178.2,
+  "N_bRd_kN": 1294.2012073709648,
+  "section": "CHS 273x8 (cantilever, Lcr=2L)"
+ },
+ "branch": {
+  "N_Ed_kN": 96.77720547732301,
+  "H_kN": 85.91347391416552,
+  "N_bRd_kN": 850.2335733057498,
+  "section": "CHS 168.3x8"
+ },
+ "uplift": {
+  "net_uplift_per_col_kN": 223.2
+ },
+ "tile_thermal_movement_mm": 4.14
+}

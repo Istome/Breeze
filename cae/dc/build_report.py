@@ -5,10 +5,12 @@ from common import ROOT
 from breeze.dc.sim import Design, PRICE, ROOFS
 
 R = json.load(open(os.path.join(ROOT, "results", "dc", "generations.json")))
-DOC = os.path.join(ROOT, "docs", "dc_report")
-for f in os.listdir(os.path.join(ROOT, "results", "dc")):
+DOC = os.environ.get("DC_DOC_DIR", os.path.join(ROOT, "docs", "dc_report"))
+SRC = os.environ.get("DC_FIG_DIR", os.path.join(ROOT, "results", "dc"))
+os.makedirs(os.path.join(DOC, "fig"), exist_ok=True)
+for f in os.listdir(SRC):
     if f.startswith("d_") and f.endswith(".png"):
-        shutil.copy(os.path.join(ROOT, "results", "dc", f), os.path.join(DOC, "fig", f))
+        shutil.copy(os.path.join(SRC, f), os.path.join(DOC, "fig", f))
 G = {g["name"].split(" ")[0]: g for g in R["generations"]}
 prog = R["progression"]
 base, opt = prog[0], R["g6_finals"]["cost-optimal"]["result"]
@@ -387,7 +389,7 @@ The cost-optimal design stays cheapest under every stress, including water at $1
 
 **Performance.** The heat-wave dispatch (Figure 11) shows how each design rides the 46 °C peak. The cost-optimal design uses its pads for a few hours each afternoon. The water-neutral design charges its buffer in the afternoon and empties it overnight.
 
-![Figure 11: Heat-wave dispatch of the two finalists (kW, six days around the 46 °C peak; air temperature in black)](fig/d_heatwave.png)
+![Figure 11: Heat-wave dispatch of the two finalists (kW, six days around the 46 °C peak; air temperature in {'white' if os.environ.get('DARK') == '1' else 'black'})](fig/d_heatwave.png)
 
 ![Figure 12: Daily-mean heat rejected by each sink over the year](fig/d_annual.png)
 

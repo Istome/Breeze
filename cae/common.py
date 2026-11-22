@@ -8,8 +8,15 @@ sys.path.insert(0, ROOT)
 RES = os.path.join(ROOT, "results")
 os.makedirs(RES, exist_ok=True)
 
-INK, MUTED, GRID = "#1f2328", "#6e7781", "#d8dee4"
-C = ["#2f6fdf", "#e0642a", "#1a9e75", "#b4489c", "#8a6d00", "#5d6b7a", "#d23b5a", "#3fa7c9", "#111111"]
+DARK = os.environ.get("DARK") == "1"
+if DARK:
+    BG, INK, MUTED, GRID = "#10141c", "#e6eaf2", "#9aa4b5", "#2a3242"
+    C = ["#6f8fff", "#ff8a50", "#3fcf9a", "#d07fe8", "#e2be4c", "#9aa7bb", "#ff6b85", "#5fc6e6", "#e6eaf2"]
+    plt.rcParams.update({"figure.facecolor": BG, "axes.facecolor": BG, "savefig.facecolor": BG, "text.color": INK,
+                         "axes.titlecolor": INK, "legend.labelcolor": INK, "hatch.color": MUTED})
+else:
+    BG, INK, MUTED, GRID = "#ffffff", "#1f2328", "#6e7781", "#d8dee4"
+    C = ["#2f6fdf", "#e0642a", "#1a9e75", "#b4489c", "#8a6d00", "#5d6b7a", "#d23b5a", "#3fa7c9", "#111111"]
 plt.rcParams.update({
     "figure.dpi": 130, "savefig.dpi": 160, "font.size": 9.5, "axes.edgecolor": MUTED,
     "axes.labelcolor": INK, "xtick.color": MUTED, "ytick.color": MUTED, "axes.grid": True,

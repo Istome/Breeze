@@ -3,15 +3,32 @@ import json, os, sys
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from common import plt, C, ROOT
+from common import plt, C, ROOT, DARK, BG, INK, MUTED
 from matplotlib.patches import FancyBboxPatch, Rectangle, Circle, FancyArrowPatch
 
 OUT = os.path.join(ROOT, "results", "dc")
+FIG = os.environ.get("DC_FIG_DIR", OUT)
+os.makedirs(FIG, exist_ok=True)
 R = json.load(open(os.path.join(OUT, "generations.json")))
 fin = R["g6_finals"]
 
 
+def tint(c):
+    """Pastel fills become deep tints on a dark ground."""
+    if not DARK or not isinstance(c, str) or not c.startswith("#"):
+        return c
+    a = [int(c[i:i + 2], 16) for i in (1, 3, 5)]
+    b = [int(BG[i:i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join(f"{int(0.30 * x + 0.70 * y):02x}" for x, y in zip(a, b))
+
+
+_Rect, _Circ = Rectangle, Circle
+Rectangle = lambda *a, fc=None, ec=None, **k: _Rect(*a, fc=tint(fc), ec=(MUTED if DARK and ec == "#1f2328" else ec), **k)
+Circle = lambda *a, fc=None, ec=None, **k: _Circ(*a, fc=tint(fc), ec=ec, **k)
+
+
 def box(ax, x, y, w, h, text, fc, ec="#1f2328", fs=8, tc="#0e1630", bold=False):
+    fc, ec, tc = tint(fc), (MUTED if DARK else ec), (INK if DARK else tc)
     ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02,rounding_size=0.08", fc=fc, ec=ec, lw=1.0))
     ax.text(x + w / 2, y + h / 2, text, ha="center", va="center", fontsize=fs, color=tc, fontweight="bold" if bold else "normal", wrap=True)
 
@@ -67,8 +84,8 @@ def schematic(name, fname):
         box(ax, xs + 0.3 * k, yk - 0.28, 2.6, 0.56, t, c, fs=7.5)
         arrow(ax, (5.3, 1.15), (xs + 0.3 * k, yk), "#2346d6", 1.2)
     ax.text(0.2, 6.0, f"{name} design, hot-dry site", ha="left", fontsize=10, fontweight="bold")
-    ax.text(0.2, 5.65, f"effective PUE {res['PUE_eff']:.3f} · WUE {res['WUE']:.2f} L/kWh · ${res['annual_cost']/1e3:.0f}k/yr", ha="left", fontsize=8.5, color="#4a5468")
-    fig.savefig(os.path.join(OUT, fname), dpi=170, bbox_inches="tight")
+    ax.text(0.2, 5.65, f"effective PUE {res['PUE_eff']:.3f} · WUE {res['WUE']:.2f} L/kWh · ${res['annual_cost']/1e3:.0f}k/yr", ha="left", fontsize=8.5, color=MUTED)
+    fig.savefig(os.path.join(FIG, fname), dpi=170, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -117,7 +134,7 @@ def plan(name, fname):
     ax.text(-18, -2, "S", fontsize=8); ax.text(21, -2, "N", fontsize=8)
     ax.set(xlim=(-22, 24), ylim=(-3, 12), aspect="equal", xlabel="m", title="Section S–N")
     ax.grid(False)
-    fig.savefig(os.path.join(OUT, fname), dpi=170, bbox_inches="tight")
+    fig.savefig(os.path.join(FIG, fname), dpi=170, bbox_inches="tight")
     plt.close(fig)
 
 

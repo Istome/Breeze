@@ -40,9 +40,30 @@ blockquote { border-left: 4px solid #2346d6; margin: 10px 0; padding: 4px 12px; 
 hr { border: 0; border-top: 1px solid #c9d2e3; margin: 16px 0; }
 strong { color: #0e1630; }
 """
+DARK = os.environ.get("DARK") == "1"
+if DARK:
+    md_dark = True
+    css += """
+@page { background-color: #10141c; margin: 16mm 15mm 18mm 15mm; }
+html, body { background: #10141c; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { color: #dfe4ee; }
+h1 { color: #f2f5fa; border-bottom-color: #6f8fff; }
+h2 { color: #f2f5fa; border-bottom-color: #2a3242; }
+h3 { color: #8fa8ff; } h4 { color: #ff9a66; }
+strong { color: #ffffff; }
+code, pre { background: #1a2130; color: #dfe4ee; }
+th { background: #24304a; color: #f2f5fa; }
+td { border-bottom-color: #2a3242; }
+tr:nth-child(even) td { background: #151b26; }
+figcaption { color: #9aa4b5; }
+blockquote { background: #161d2b; border-left-color: #6f8fff; color: #dfe4ee; }
+hr { border-top-color: #2a3242; }
+a { color: #8fa8ff; }
+"""
 html = f"<!doctype html><html><head><meta charset='utf-8'><style>{css}</style></head><body>{html_body}</body></html>"
 tmp = os.path.splitext(out)[0] + ".html"
 open(tmp, "w", encoding="utf-8").write(html)
+FOOT = "#9aa4b5" if DARK else "#6e7781"
 js = f"""
 const {{ chromium }} = require('playwright');
 (async () => {{
@@ -51,8 +72,8 @@ const {{ chromium }} = require('playwright');
   await p.goto('file://{os.path.abspath(tmp)}', {{waitUntil: 'load'}});
   await p.pdf({{path: '{os.path.abspath(out)}', format: 'A4', printBackground: true,
     displayHeaderFooter: true, headerTemplate: '<div></div>',
-    footerTemplate: '<div style="font-size:7pt;color:#6e7781;width:100%;text-align:center">Zenith DC: evolutionary redesign · page <span class="pageNumber"></span> / <span class="totalPages"></span></div>',
-    margin: {{top: '16mm', bottom: '18mm', left: '15mm', right: '15mm'}}}});
+    footerTemplate: '<div style="font-size:7pt;color:{FOOT};width:100%;text-align:center">Zenith DC: evolutionary redesign · page <span class="pageNumber"></span> / <span class="totalPages"></span></div>',
+    {'preferCSSPageSize: true' if DARK else "margin: {top: '16mm', bottom: '18mm', left: '15mm', right: '15mm'}"}}});
   await b.close();
 }})();
 """

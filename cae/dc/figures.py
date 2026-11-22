@@ -3,16 +3,22 @@ import json, os, sys
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from common import plt, C, ROOT
+from common import plt, C, ROOT, DARK, BG, INK, MUTED
 
 OUT = os.path.join(ROOT, "results", "dc")
+FIG = os.environ.get("DC_FIG_DIR", OUT)
+os.makedirs(FIG, exist_ok=True)
 R = json.load(open(os.path.join(OUT, "generations.json")))
 STAT = {"confirmed": "#1a9e75", "refuted": "#d23b5a", "marginal": "#8a8f99"}
 
 
+if DARK:
+    STAT = {"confirmed": "#3fcf9a", "refuted": "#ff6b85", "marginal": "#9aa4b5"}
+
+
 def save(fig, name):
     fig.tight_layout()
-    fig.savefig(os.path.join(OUT, name), dpi=170, bbox_inches="tight")
+    fig.savefig(os.path.join(FIG, name), dpi=170, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -56,7 +62,7 @@ yv = np.arange(len(rows))
 ax.barh(yv, [max(-60, min(60, r[2])) for r in rows], color=[STAT[r[1]] for r in rows])
 ax.set_yticks(yv, [r[0] for r in rows], fontsize=7.4)
 ax.invert_yaxis()
-ax.axvline(0, color="k", lw=0.8)
+ax.axvline(0, color=INK, lw=0.8)
 for i, r in enumerate(rows):
     ax.text(max(-60, min(60, r[2])) + (1 if r[2] >= 0 else -1), i, f"{r[2]:+.1f}%", va="center", ha="left" if r[2] >= 0 else "right", fontsize=6.8)
 ax.set(xlabel="annual cost saved by the idea, after re-optimising everything else (%)", xlim=(-70, 70))
@@ -110,7 +116,7 @@ for ax, name in zip(axs, ("cost-optimal", "water-neutral")):
     stack = [np.array(h.get(k, [0] * len(t))) for k, _, _ in order]
     ax.stackplot(t, *stack, colors=[c for _, _, c in order], labels=[l for _, l, _ in order])
     ax2 = ax.twinx()
-    ax2.plot(t, R["g6_hourly"][name]["heatwave_T"], color="k", lw=1.2)
+    ax2.plot(t, R["g6_hourly"][name]["heatwave_T"], color=INK, lw=1.2)
     ax2.set_ylabel("air °C")
     ax.set(xlabel="hour from 13 July (heat wave peaks at 46 °C)", title=f"{name} design", ylabel="heat rejected (kW)")
 axs[0].legend(fontsize=6.5, loc="upper left", ncol=2)
